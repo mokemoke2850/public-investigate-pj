@@ -96,21 +96,29 @@ const KonvaTemplate = () => {
   useEffect(() => {
     const removeText = (e: KeyboardEvent) => {
       const pressKey = e.key;
-      if (
-        (pressKey === 'Backspace' || pressKey === 'Delete') &&
-        selectedId.type === 'text'
-      ) {
-        const removedTexts = addedTexts.filter(
-          (text) => text.id !== selectedId.id
-        );
-        setAddedTexts(removedTexts);
+      if (pressKey === 'Backspace' || pressKey === 'Delete') {
+        if (selectedId.type === 'text') {
+          const removedTexts = addedTexts.filter(
+            (text) => text.id !== selectedId.id
+          );
+          setAddedTexts(removedTexts);
+          return;
+        }
+
+        if (selectedId.type === 'image') {
+          const removedImage = imageList.filter(
+            (image) => image.id !== selectedId.id
+          );
+          setImageList(removedImage);
+          return;
+        }
       }
     };
     document.addEventListener('keydown', removeText);
     return () => {
       document.removeEventListener('keydown', removeText);
     };
-  }, [addedTexts, selectedId]);
+  }, [addedTexts, imageList, selectedId]);
 
   const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length !== 1) {
