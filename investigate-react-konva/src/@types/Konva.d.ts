@@ -11,3 +11,15 @@ export interface AddingText {
   scaleX?: number;
   scaleY?: number;
 }
+
+export interface SelectedIdState {
+  type: 'text' | 'image' | 'none';
+  id: number;
+}
+
+export interface AddingImage {
+  id: number;
+  image: string;
+  x: number;
+  y: number;
+}

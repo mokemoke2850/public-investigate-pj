@@ -1,12 +1,12 @@
 import { Text, Transformer } from 'react-konva';
-import { AddingText } from '../../../@types/Konva';
+import { AddingText, SelectedIdState } from '../../../@types/Konva';
 import React, { useEffect, useRef } from 'react';
 
 interface TransformerTextProps {
   text: AddingText;
   isSelected: boolean;
   setCursorShapeFunc: (value: string) => void;
-  setSelectedId: (value: number) => void;
+  setSelectedId: (value: SelectedIdState) => void;
 }
 
 const TransformerText: React.FC<TransformerTextProps> = (props) => {
@@ -32,7 +32,10 @@ const TransformerText: React.FC<TransformerTextProps> = (props) => {
         onClick={(e) => {
           e.cancelBubble = true;
           e.evt.stopPropagation();
-          setSelectedId(text.id ?? -1);
+          setSelectedId({
+            type: 'text',
+            id: text.id,
+          });
         }}
         onMouseEnter={() => setCursorShapeFunc('grab')}
         onMouseLeave={() => setCursorShapeFunc('default')}

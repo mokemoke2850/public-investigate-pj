@@ -5,7 +5,8 @@ import GridEditLayersTemplate from './konva-layers/GridEditLayersTemplate';
 import MultiLayersTemplate from './konva-layers/MultiLayersTemplate';
 import { Portal } from 'react-konva-utils';
 import AddedTextLayerTemplate from './konva-layers/AddedTextLayerTemplate';
-import { AddingText } from '../../@types/Konva';
+import { AddingImage, AddingText, SelectedIdState } from '../../@types/Konva';
+import ImportImageLayerTemplate from './konva-layers/ImportImageLayerTemplate';
 
 const testData = [
   {
@@ -45,18 +46,25 @@ const KonvaTemplate = () => {
   const [zIndex, setZIndex] = useState({
     grid: 1,
     rect: 0,
-    addedText: 2,
+    addedText: 3,
+    addedImage: 2,
   });
 
   const [addedTexts, setAddedTexts] = useState<AddingText[]>([]);
   const [inputAddingText, setInputAddingText] = useState('');
-  const [selectedTextId, setSelectedTextId] = useState(-1);
+  const [selectedId, setSelectedId] = useState<SelectedIdState>({
+    type: 'none',
+    id: -1,
+  });
 
   const [rectPosition] = useState({
     x: 20,
     y: 50,
   });
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadImageName, setUploadImageName] = useState('');
+  const [uploadImage, setUploadImage] = useState<File>();
+  const [imageList, setImageList] = useState<AddingImage[]>([]);
   // download the image
   const handleExport = () => {
     if (!stageRef.current) {
@@ -90,10 +98,10 @@ const KonvaTemplate = () => {
       const pressKey = e.key;
       if (
         (pressKey === 'Backspace' || pressKey === 'Delete') &&
-        selectedTextId !== -1
+        selectedId.type === 'text'
       ) {
         const removedTexts = addedTexts.filter(
-          (text) => text.id !== selectedTextId
+          (text) => text.id !== selectedId.id
         );
         setAddedTexts(removedTexts);
       }
@@ -102,7 +110,39 @@ const KonvaTemplate = () => {
     return () => {
       document.removeEventListener('keydown', removeText);
     };
-  }, [addedTexts, selectedTextId]);
+  }, [addedTexts, selectedId]);
+
+  const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.length !== 1) {
+      return;
+    }
+    setUploadImageName(e.target.files[0].name);
+    setUploadImage(e.target.files[0]);
+  };
+
+  const handleAddImageClick = () => {
+    if (uploadImage === undefined) {
+      window.alert('select a file');
+      return;
+    }
+
+    const addingFile = URL.createObjectURL(uploadImage);
+    const newImageId =
+      imageList.length === 0
+        ? 0
+        : Math.max(...imageList.map((image) => image.id)) + 1;
+    setImageList([
+      ...imageList,
+      {
+        id: newImageId,
+        image: addingFile,
+        x: 300,
+        y: 300,
+      },
+    ]);
+    setUploadImage(undefined);
+    setUploadImageName('');
+  };
 
   const layers = [
     {
@@ -148,12 +188,23 @@ const KonvaTemplate = () => {
           setAddedTexts={(value: AddingText[]) => {
             setAddedTexts(value);
           }}
-          selectedTextId={selectedTextId}
-          setSelectedTextId={setSelectedTextId}
+          selectedId={selectedId}
+          setSelectedTextId={setSelectedId}
           setCursorShapeFunc={setPointerShape}
         />
       ),
       zIndex: zIndex.addedText,
+    },
+    {
+      layer: (
+        <ImportImageLayerTemplate
+          imageList={imageList}
+          selectedId={selectedId}
+          setSelectedTextId={setSelectedId}
+          setCursorShapeFunc={setPointerShape}
+        />
+      ),
+      zIndex: zIndex.addedImage,
     },
   ];
 
@@ -233,10 +284,49 @@ const KonvaTemplate = () => {
               Add Text
             </button>
           </div>
+          <div className="flex justify-end gap-2">
+            <label
+              className="rounded bg-purple-600 px-4 py-2  font-bold text-white"
+              htmlFor="upload-image"
+            >
+              Select file
+            </label>
+            <p className="w-64 min-w-fit rounded bg-white pl-1 align-bottom ">
+              {uploadImageName}
+            </p>
+            <input
+              id="upload-image"
+              type="file"
+              accept="image/jpeg, image/png, image/jpg"
+              onChange={handleUploadImage}
+              className="hidden"
+            />
+            <button
+              onClick={handleAddImageClick}
+              className="
+                  flex
+                  h-8
+                  items-center
+                  rounded
+                  border-2
+                  bg-slate-50
+                  px-4
+                  py-2
+                  font-bold
+                  hover:bg-slate-100
+                  active:bg-slate-200
+                "
+            >
+              Add Image
+            </button>
+          </div>
         </section>
         <Stage
           onClick={() => {
-            setSelectedTextId(-1);
+            setSelectedId({
+              type: 'none',
+              id: -1,
+            });
           }}
           className="w-[1000px] border-2 border-slate-400 bg-white"
           width={1000}
