@@ -168,3 +168,8 @@ resource "aws_cloudfront_origin_access_control" "for-frontend" {
 }
 
 #endregion: CloudFront
+
+
+#TODO: Add WAF configuration
+
+#TODO: Add ACM configuration
