@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">=5.3.0"
+  required_version = "~>1.6.5"
   # # When deploying to production, you can use the following configuration.
   #   backend "s3" {
   #     bucket  = "terraform-remote-state-bucket"
