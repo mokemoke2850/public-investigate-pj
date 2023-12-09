@@ -61,7 +61,16 @@ function App() {
   }, [jwtToken]);
 
   return (
-    <Authenticator hideSignUp>
+    <Authenticator
+      hideSignUp
+      formFields={{
+        setupTotp: {
+          QR: {
+            totpIssuer: import.meta.env.VITE_APP_NAME,
+          },
+        },
+      }}
+    >
       {({ signOut }) => (
         <AfterLoginPage signOutAction={signOut} user={userAuth} />
       )}
