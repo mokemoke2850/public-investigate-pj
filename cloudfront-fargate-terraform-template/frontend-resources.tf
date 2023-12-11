@@ -52,33 +52,8 @@ resource "aws_s3_bucket" "bucket-for-hosting" {
   bucket = "${var.resource_name_prefix}-frontend-bucket"
 }
 
-resource "aws_s3_bucket_ownership_controls" "bucket-for-hosting-ownership-controls" {
-  bucket = aws_s3_bucket.bucket-for-hosting.id
-  rule {
-    object_ownership = "BucketOwnerPreferred"
-  }
-}
-
-resource "aws_s3_bucket_acl" "bucket-for-hosting-acl" {
-  bucket     = aws_s3_bucket.bucket-for-hosting.id
-  acl        = "private"
-  depends_on = [aws_s3_bucket_ownership_controls.bucket-for-hosting-ownership-controls]
-}
-
-resource "aws_s3_bucket_website_configuration" "backend-for-hosting-website-configuration" {
-  bucket = aws_s3_bucket.bucket-for-hosting.id
-  index_document {
-    suffix = "index.html"
-  }
-
-  # When using React router, you need to set this property.
-  error_document {
-    key = "index.html"
-  }
-}
-
-
 data "aws_iam_policy_document" "bucket-for-hosting-policy" {
+  version = "2012-10-17"
   statement {
     sid    = "Allow CloudFront access to S3 bucket"
     effect = "Allow"
@@ -86,11 +61,16 @@ data "aws_iam_policy_document" "bucket-for-hosting-policy" {
       "s3:GetObject",
     ]
     resources = [
-      "${s3.bucket-for-hosting.arn}/*",
+      "${aws_s3_bucket.bucket-for-hosting.arn}/*",
     ]
     principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_distribution.for-frontend.arn]
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.for-frontend.arn]
     }
   }
 }
@@ -105,9 +85,13 @@ resource "aws_s3_bucket_policy" "allow-cloudfront-access" {
 
 #region: CloudFront
 
+data "aws_cloudfront_cache_policy" "for-frontend" {
+  name = "Managed-CachingOptimized"
+}
+
 resource "aws_cloudfront_distribution" "for-frontend" {
   origin {
-    domain_name              = aws_s3_bucket.bucket-for-hosting.website_endpoint
+    domain_name              = aws_s3_bucket.bucket-for-hosting.bucket_domain_name
     origin_id                = aws_s3_bucket.bucket-for-hosting.id
     origin_access_control_id = aws_cloudfront_origin_access_control.for-frontend.id
   }
@@ -120,14 +104,8 @@ resource "aws_cloudfront_distribution" "for-frontend" {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = aws_s3_bucket.bucket-for-hosting.id
+    cache_policy_id  = data.aws_cloudfront_cache_policy.for-frontend.id
 
-    forwarded_values {
-      query_string = true
-
-      cookies {
-        forward = "none"
-      }
-    }
 
     viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
@@ -149,7 +127,7 @@ resource "aws_cloudfront_distribution" "for-frontend" {
   price_class = "PriceClass_100"
 
   custom_error_response {
-    error_code            = "404"
+    error_code            = "403"
     response_code         = "200"
     response_page_path    = "/index.html"
     error_caching_min_ttl = 0
