@@ -1,0 +1,17 @@
+{
+  "name": "python3.12 development container",
+  "dockerComposeFile": "../compose.yaml",
+  "service": "python-dev-env",
+  "workspaceFolder": "/docker-env",
+  "remoteUser": "docker",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "streetsidesoftware.code-spell-checker",
+        "ms-python.python",
+        "formulahendry.code-runner"
+      ],
+      "settings": {}
+    }
+  }
+}
