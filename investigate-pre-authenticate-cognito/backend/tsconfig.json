@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    /* 基本設定 */
+    "target": "ES2022",                   /* Node.js 22 の機能をフル活用 */
+    "module": "NodeNext",                 /* Node.js 22 の ESM/CommonJS 解決ルールに準拠 */
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    
+    /* 出力設定 */
+    "outDir": "dist",                     /* ビルド後のファイル出力先 */
+    "rootDir": "./",                      /* ルートディレクトリを起点にする */
+    "sourceMap": false,                    /* CloudWatch Logsでエラー箇所を特定しやすくする */
+    "declaration": false,                 /* Lambda実行用なので型定義ファイルは不要 */
+
+    /* 厳格なチェック */
+    "strict": true,                       /* 以前の「致命的な不確定要素」を防ぐために必須 */
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    /* 互換性・その他 */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "pre-authentication-trigger/**/*.ts",
+    "post-authentication-trigger/**/*.ts",
+    "post-confirmation-trigger/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts"
+  ]
+}

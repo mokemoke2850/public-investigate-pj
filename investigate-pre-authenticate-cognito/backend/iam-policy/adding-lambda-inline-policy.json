@@ -1,0 +1,11 @@
+// デフォルトで作成されるLambdaロールに以下のインラインポリシーをアタッチする
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "cognito-idp:AdminUpdateUserAttributes",
+            "Resource": "arn:aws:cognito-idp:リージョン:アカウントID:userpool/ユーザープールID"
+        }
+    ]
+}

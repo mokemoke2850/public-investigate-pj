@@ -1,0 +1,2 @@
+import{CognitoIdentityProviderClient as a,AdminUpdateUserAttributesCommand as s}from"@aws-sdk/client-cognito-identity-provider";var i=new a({}),m=async o=>{if(o.triggerSource==="PostConfirmation_ConfirmForgotPassword"){let{userPoolId:t,userName:e}=o,n=new Date().toISOString();try{let r=new s({UserPoolId:t,Username:e,UserAttributes:[{Name:"custom:last_password_change",Value:n}]});await i.send(r)}catch(r){console.error("Failed to update password change date:",r)}}return o};export{m as handler};
+//# sourceMappingURL=post-confirmation-trigger.js.map
